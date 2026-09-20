@@ -2,10 +2,10 @@
 name: roadmap
 description: Use after PRD and architecture are validated. Splits the product into ordered, independently shippable features and creates GitHub issues. Each issue then goes through /spec.
 ---
-Pré-requis : PRD et ARCHITECTURE validés.
-1. Extrais les features Must puis Should du PRD. Découpe toute feature > ~3 jours de travail en sous-features livrables seules.
-2. Ordonne par dépendance technique (fondations d'abord : squelette, auth, modèle de données), puis par valeur.
-3. Écris `docs/ROADMAP.md` : tableau (ordre, feature, périmètre en une ligne, dépend de, valeur, statut).
-4. Pour chaque feature : `gh issue create --label feature --title "<feature>" --body "<périmètre + dépendances + lien PRD>"`.
-5. Affiche la roadmap. La première feature de la liste est la prochaine entrée de /spec.
-Ne détaille pas les specs ici : c'est /spec, une par une.
+Prerequisites: validated PRD and ARCHITECTURE.
+1. Extract the Must then Should features from the PRD. Split any feature larger than ~3 days of work into sub-features that can ship on their own.
+2. Order by technical dependency (foundations first: skeleton, auth, data model), then by value.
+3. Write `docs/ROADMAP.md`: table (order, feature, one-line scope, depends on, value, status).
+4. For each feature: `gh issue create --label feature --title "<feature>" --body "<scope + dependencies + PRD link>"`.
+5. Display the roadmap. Do not detail the specs here: that is /spec, one at a time.
+6. Then run the `spec` skill right away on the first feature of the list (the skeleton), without waiting to be asked.

@@ -1,5 +1,5 @@
-# ADR-0000 : <titre>
-Date : · Statut : proposé | accepté | remplacé par ADR-xxxx
-## Contexte
-## Décision
-## Conséquences
+# ADR-0000: <title>
+Date: · Status: proposed | accepted | superseded by ADR-xxxx
+## Context
+## Decision
+## Consequences

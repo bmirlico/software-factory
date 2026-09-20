@@ -1,12 +1,12 @@
-# Spec : <titre>   — statut : draft | validée   — issue : #
-## Contexte
-## Objectif
-## Hors périmètre
-## Critères d'acceptation (EARS — chacun = un test)
-- [ ] AC1 Quand <…>, le système doit <…>.
-- [ ] AC2 Si <…>, alors le système doit <…>.
-## Tranches indépendantes (une par `builder`)
-1. backend/ — …
-2. frontend/ — …
-## Risques
-## ADR impactés
+# Spec: <title>   - status: draft | validated   - issue: #
+## Context
+## Goal
+## Out of scope
+## Acceptance criteria (EARS - each one = a test)
+- [ ] AC1 When <...>, the system shall <...>.
+- [ ] AC2 If <...>, then the system shall <...>.
+## Independent slices (one per `builder`)
+1. backend/ - ...
+2. frontend/ - ...
+## Risks
+## Impacted ADRs

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Gate de fin de tâche : si `make check` échoue, on renvoie exit 2
-# → Claude Code bloque l'arrêt et reçoit la sortie sur stderr pour continuer à corriger.
-# Garde-fou anti-boucle : Claude Code passe stop_hook_active=true si un Stop hook a déjà bloqué.
+# End-of-task gate: if `make check` fails, exit 2
+# → Claude Code blocks the stop and receives the output on stderr so it keeps fixing.
+# Anti-loop guard: Claude Code passes stop_hook_active=true when a Stop hook has already blocked.
 INPUT=$(cat)
 if echo "$INPUT" | grep -q '"stop_hook_active": *true'; then exit 0; fi
 OUT=$(make check 2>&1)
 if [ $? -ne 0 ]; then
-  echo "make check est ROUGE. Corrige avant de t'arrêter :" >&2
+  echo "make check is RED. Fix it before stopping:" >&2
   echo "$OUT" | tail -n 60 >&2
   exit 2
 fi

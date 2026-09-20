@@ -33,8 +33,9 @@
         "hooks": [{ "type": "command", "command": "bash .claude/hooks/stop-check.sh" }]
       }
     ],
-    "PostCompact": [
+    "SessionStart": [
       {
+        "matcher": "compact",
         "hooks": [{ "type": "command", "command": "cat AGENTS.md" }]
       }
     ]
