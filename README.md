@@ -1,217 +1,220 @@
-# Software Factory — récap de la structure
+# Software Factory - structure overview
 
-Template de repo pour une "software factory" pilotée par Claude Code : spec → build parallèle → vérification → PR → review sur la PR → merge humain.
-Stack-agnostique : la stack ne vit que dans les cibles du `Makefile`.
+Repo template for a "software factory" driven by Claude Code: spec → parallel build → verification → PR → review on the PR → human merge.
+Stack-agnostic: the stack lives only in the `Makefile` targets.
 
-Légende : **[V]** mécanique vérifiée dans les docs Claude Code / README des projets · **[D]** choix de design (à adapter) · **[O]** optionnel.
+Legend: **[V]** mechanic verified in the Claude Code docs / project READMEs · **[D]** design choice (adapt it) · **[O]** optional.
 
 ---
 
-## 1. Principes
+## 1. Principles
 
-| # | Principe | Statut |
+| # | Principle | Status |
 |---|---|---|
-| 1 | Une interface unique (`Makefile`) appelée par toi, Claude, les agents et la CI. La stack ne vit que là | [D] |
-| 2 | Vérification partout : Claude doit pouvoir lancer `make check` et voir le résultat (conseil n°1 d'Anthropic) | [V] |
-| 3 | Deux points humains seulement : valider la spec, merger la PR | [D] |
-| 4 | La review se fait sur la PR, jamais en local | [D] |
-| 5 | Chaque erreur de Claude → une ligne dans `AGENTS.md` ("Pièges connus") | [V] |
+| 1 | A single interface (`Makefile`) called by you, Claude, the agents and CI. The stack lives only there | [D] |
+| 2 | Verification everywhere: Claude must be able to run `make check` and see the result (Anthropic's #1 tip) | [V] |
+| 3 | Only two human touchpoints: validating the spec, merging the PR | [D] |
+| 4 | Review happens on the PR, never locally | [D] |
+| 5 | Every Claude mistake → one line in `AGENTS.md` ("Known pitfalls") | [V] |
 
 ---
 
-## 2. Arborescence
+## 2. Tree
 
 ```
 repo/
-├─ Makefile                      # couche 0 : contrat (dev, test, e2e, lint, fmt, typecheck, check, build, migrate)
-├─ AGENTS.md                     # couche 1 : contexte racine (standard cross-outils ; Claude Code ≥ 2.1.277 le lit si aucun CLAUDE.md n'existe)
-├─ backend/AGENTS.md             # conventions du langage backend
-├─ frontend/AGENTS.md            # React web : conventions + skills Vercel à utiliser
-├─ mobile/AGENTS.md              # React Native/Expo : conventions + skills Vercel à utiliser
-├─ docs/CONSTITUTION.md          # principes non négociables (Spec Kit "constitution")
-├─ docs/PRD.md · ARCHITECTURE.md · ROADMAP.md   # produits par /prd, /architecture, /roadmap (from scratch)
-├─ docs/specs/                   # 1 micro-spec par feature (EARS), validée avant le code
-├─ docs/adr/                     # décisions d'architecture
-├─ .pre-commit-config.yaml       # couche 2 : lint avant commit
-├─ .github/workflows/ci.yml      # couche 5 : make check + make e2e
-├─ .github/workflows/claude.yml  # couche 5 : @claude sur issues/PR
-├─ scripts/install-skills.sh     # skills/plugins/MCP à installer
+├─ Makefile                      # layer 0: contract (dev, test, e2e, lint, fmt, typecheck, check, build, migrate)
+├─ AGENTS.md                     # layer 1: root context (cross-tool standard; Claude Code ≥ 2.1.277 reads it when no CLAUDE.md exists)
+├─ backend/AGENTS.md             # backend language conventions
+├─ frontend/AGENTS.md            # React web: conventions + Vercel skills to use
+├─ mobile/AGENTS.md              # React Native/Expo: conventions + Vercel skills to use
+├─ docs/CONSTITUTION.md          # non-negotiable principles (Spec Kit "constitution")
+├─ docs/PRD.md · ARCHITECTURE.md · ROADMAP.md   # produced by /prd, /architecture, /roadmap (from scratch)
+├─ docs/specs/                   # 1 micro-spec per feature (EARS), validated before the code
+├─ docs/adr/                     # architecture decisions
+├─ .pre-commit-config.yaml       # layer 2: lint before commit
+├─ .github/workflows/ci.yml      # layer 5: make check + make e2e
+├─ .github/workflows/claude.yml  # layer 5: @claude on issues/PRs
+├─ scripts/install-skills.sh     # skills/plugins/MCP servers to install
+├─ scripts/factory-next.sh       # launches the next N validated specs, one Claude session each
 └─ .claude/
-   ├─ settings.json              # couche 3 : permissions + hooks
-   ├─ hooks/stop-check.sh        # gate `make check` quand Claude pense avoir fini
+   ├─ settings.json              # layer 3: permissions + hooks
+   ├─ hooks/stop-check.sh        # `make check` gate when Claude thinks it is done
    ├─ agents/                    # researcher, builder, verifier, simplifier, reviewer
    └─ skills/                    # prd, architecture, roadmap, spec, build, pr, design-review, techdebt [O]
 ```
 
 ---
 
-### Note AGENTS.md
-Depuis Claude Code 2.1.277 (18 sept. 2026), si un dossier n'a pas de CLAUDE.md, Claude lit AGENTS.md (activable/désactivable dans `/config`). Règle : **ne crée jamais de CLAUDE.md dans ce repo**, sinon il prend le dessus et AGENTS.md est ignoré à ce niveau. Même fichier lu par Codex, Cursor, Amp… [V]
+### Note on AGENTS.md
 
-## 3. Couche 0 — Contrat `Makefile`
+Since Claude Code 2.1.277 (Sept. 18, 2026), when a directory has no CLAUDE.md, Claude reads AGENTS.md (can be toggled in `/config`).
+Rule: **never create a CLAUDE.md in this repo**, otherwise it takes over and AGENTS.md is ignored at that level.
+The same file is read by Codex, Cursor, Amp... [V]
 
-| Cible | Rôle | Exemples par stack |
+## 3. Layer 0 - `Makefile` contract
+
+| Target | Role | Examples per stack |
 |---|---|---|
-| `dev` | lance tout (deps via docker-compose + back + front) | uvicorn + vite / next dev / go run |
-| `test` | tests unitaires + intégration, < 2 min | pytest / vitest / go test / cargo test |
-| `e2e` | tests navigateur | playwright |
-| `lint` | lint + format **check** (ne modifie rien) | ruff / eslint+prettier ou biome / golangci-lint / clippy |
+| `dev` | starts everything (deps via docker-compose + back + front) | uvicorn + vite / next dev / go run |
+| `test` | unit + integration tests, < 2 min | pytest / vitest / go test / cargo test |
+| `e2e` | browser tests | playwright |
+| `lint` | lint + format **check** (modifies nothing) | ruff / eslint+prettier or biome / golangci-lint / clippy |
 | `fmt` | format + autofix | ruff format / prettier -w / gofmt / rustfmt |
-| `typecheck` | types | mypy ou pyright / tsc / compilateur |
-| `check` | `lint` + `typecheck` + `test` — le gate | ce que la CI et le hook Stop lancent |
-| `build` | artefact prod | |
-| `migrate` | migrations DB | alembic / prisma / … |
+| `typecheck` | types | mypy or pyright / tsc / compiler |
+| `check` | `lint` + `typecheck` + `test` - the gate | what CI and the Stop hook run |
+| `build` | production artifact | |
+| `migrate` | DB migrations | alembic / prisma / ... |
 
-Transverse à toute stack : `gitleaks` (secrets), audit de dépendances (`pip-audit` / `npm audit` / `cargo audit`), `pre-commit`.
-`make` n'est pas un standard formel mais une convention universelle ; `just` est une alternative équivalente. Choisis-en un et ne change plus.
+Cross-cutting for any stack: `gitleaks` (secrets), dependency audit (`pip-audit` / `npm audit` / `cargo audit`), `pre-commit`.
+`make` is not a formal standard but a universal convention; `just` is an equivalent alternative.
+Pick one and never change.
 
 ---
 
-## 4. Couche 3 — Configuration Claude Code
+## 4. Layer 3 - Claude Code configuration
 
-### 4.1 `settings.json` [V pour le format]
+### 4.1 `settings.json` [V for the format]
 
-| Élément | Contenu |
+| Item | Content |
 |---|---|
-| `permissions.allow` | `make *`, `git status/diff/log`, `gh pr *` |
-| `permissions.deny` | édition de `.env*`, `git push --force`, `rm -rf` |
-| Hook `PostToolUse` (Write\|Edit) | `make fmt` — format automatique après chaque édition |
-| Hook `Stop` | `hooks/stop-check.sh` → `make check` ; si rouge, Claude continue |
-| Hook `PostCompact` | réinjecte `AGENTS.md` après compaction du contexte |
+| `permissions.allow` | `make *`, `git status/diff/log/add/commit`, `git push`, `gh pr *`, `before-and-after *` |
+| `permissions.deny` | reading or editing `.env*`, `git push --force`, `rm -rf` |
+| `PostToolUse` hook (Write\|Edit) | `make fmt` - automatic formatting after every edit |
+| `Stop` hook | `hooks/stop-check.sh` → `make check`; if red, Claude keeps going |
+| `SessionStart` hook (matcher `compact`) | re-injects `AGENTS.md` after context compaction (a `PostCompact` hook cannot: its output is not added to the context) |
 
-### 4.2 Agents (`.claude/agents/`) — 4, stack-agnostiques
+### 4.2 Agents (`.claude/agents/`) - 5, stack-agnostic
 
-| Agent | Outils | Modifie le code ? | Rôle |
+| Agent | Tools | Modifies code? | Role |
 |---|---|---|---|
-| `researcher` | Read, Grep, Glob | non | cartographie fichiers / dépendances / risques avant une spec |
-| `builder` | Read, Edit, Bash | oui, **en worktree isolé** | implémente UNE tranche de spec dans un périmètre donné ; termine par `make check` vert. Lancé N fois en parallèle (backend/, frontend/…) |
-| `verifier` | Read, Bash | non | lance `make check` + `make e2e`, rapporte les échecs fichier:ligne |
-| `simplifier` | Read, Edit, Bash | oui | duplication, abstractions inutiles, code mort, `make check` doit rester vert |
-| `reviewer` | Read, Grep, Glob, Bash | non | review indépendante du diff **contre la spec** (couverture EARS, hors périmètre, archi/ADR, robustesse). Verdict PRÊT / PAS PRÊT avant /pr |
+| `researcher` | Read, Grep, Glob | no | maps files / dependencies / risks before a spec |
+| `builder` | Read, Edit, Write, Bash, Grep, Glob | yes, **in an isolated worktree** | implements ONE spec slice within a given scope; ends with a green `make check`. Launched N times in parallel (backend/, frontend/...) |
+| `verifier` | Read, Bash, Grep, Glob | no | runs `make check` + `make e2e`, reports failures as file:line |
+| `simplifier` | Read, Edit, Bash, Grep, Glob | yes | duplication, needless abstractions, dead code; `make check` must stay green |
+| `reviewer` | Read, Grep, Glob, Bash | no | independent review of the diff **against the spec** (EARS coverage, out of scope, architecture/ADR, robustness). Verdict READY / NOT READY before /pr |
 
-Le `reviewer` est un gate automatique avant la PR ; la review humaine reste sur la PR (§6).
+The `reviewer` is an automatic gate before the PR; human review stays on the PR (§6).
 
-### 4.3 Skills à écrire (`.claude/skills/`)
+### 4.3 Skills to write (`.claude/skills/`)
 
-| Skill | Déclencheur | Ce qu'il fait | Statut |
+| Skill | Trigger | What it does | Status |
 |---|---|---|---|
-| `/prd` | nouveau projet / initiative majeure | ≤5 questions → `docs/PRD.md` (problème, personas, parcours, MoSCoW, non-objectifs, métriques) → **stop** | [D] |
-| `/architecture` | PRD validé / refonte | `researcher` → `docs/ARCHITECTURE.md` (C4 contexte+conteneurs, données, API, transverses, Mermaid) + ADR par décision + `DESIGN.md` si UI → **stop** | [D] |
-| `/roadmap` | archi validée | features ordonnées par dépendance puis valeur → `docs/ROADMAP.md` + issues GitHub | [D] |
-| `/spec` | issue de roadmap ou ad hoc | `researcher` → micro-spec `docs/specs/<slug>.md` avec critères **EARS** → **s'arrête**, attend validation humaine | [D] |
-| `/build` | spec validée | un sous-agent `builder` par tranche, en parallèle, chacun en worktree isolé → `verifier` → `simplifier` → `reviewer` vs spec | [D] |
-| `/pr` | `make check` vert | description depuis spec + diff ; si UI modifiée → `before-and-after --markdown` ; push ; `gh pr create` | [D] |
-| `/design-review` | tout changement UI | Playwright desktop+mobile, screenshots, `web-design-guidelines`, un seul lot de corrections, une confirmation, stop | [D] |
-| `/techdebt` | fin de semaine | duplication, tests lents, ADR manquants → issues | [O] |
+| `/prd` | new project / major initiative | ≤5 questions → `docs/PRD.md` (problem, personas, journeys, MoSCoW, non-goals, metrics) → **stop** | [D] |
+| `/architecture` | validated PRD / major refactor | `researcher` → `docs/ARCHITECTURE.md` (C4 context+containers, data, API, cross-cutting, Mermaid) + one ADR per decision + `DESIGN.md` if UI → **stop** → once validated, fills the `Makefile` targets, the `<...>` placeholders (CONSTITUTION, per-directory AGENTS.md) and the `ci.yml` setup for the chosen stack | [D] |
+| `/roadmap` | validated architecture | features ordered by dependency then value → `docs/ROADMAP.md` + GitHub issues | [D] |
+| `/spec` | roadmap issue or ad hoc | `researcher` → micro-spec `docs/specs/<slug>.md` with **EARS** criteria → **stops**, waits for human validation | [D] |
+| `/build` | validated spec | one `builder` subagent per slice, in parallel, each in an isolated worktree → `verifier` → `simplifier` → `reviewer` vs spec | [D] |
+| `/pr` | green `make check` | description from spec + diff; if UI changed → `before-and-after --markdown`; then ships through the `no-mistakes` gate (review, tests, push, PR, CI watch) with the spec as intent; falls back to `git push` + `gh pr create` when it is not installed | [D] |
+| `/design-review` | any UI change | Playwright desktop+mobile, screenshots, `web-design-guidelines`, one single batch of fixes, one confirmation, stop | [D] |
+| `/techdebt` | end of week | duplication, slow tests, missing ADRs → issues | [O] |
 
-### 4.4 À installer (pas à écrire) — `scripts/install-skills.sh`
+The skills chain on their own: `/prd` is the single entry point of a new project.
+Each skill stops at its human gate, and as soon as you pass it ("PRD validated", "architecture validated", "spec validated") it runs the next one: `/prd` → `/architecture` → `/roadmap` → `/spec` (first feature) → `/build` → `/pr`.
+Say "spec validated, hold" to validate a spec without building it, which is what batch mode (`scripts/factory-next.sh`) needs.
 
-Front = React (web) + React Native → on s'appuie sur la collection officielle **vercel-labs/agent-skills** (installée via `npx skills add`, le CLI de Vercel Labs).
+### 4.4 To install (not to write) - `scripts/install-skills.sh`
 
-| Quoi | Source | Rôle | Statut |
+Front = React (web) + React Native → we rely on the official **vercel-labs/agent-skills** collection (installed via `npx skills add`, the Vercel Labs CLI).
+
+| What | Source | Role | Status |
 |---|---|---|---|
-| `react-best-practices` | vercel-labs/agent-skills | 70 règles perf React/Next.js, priorisées (waterfalls, bundle en critique). ~185K installs | [V] |
-| `composition-patterns` | vercel-labs/agent-skills | patterns React qui scalent : compound components, lifting state, anti-prolifération de props booléennes | [V] |
-| `web-design-guidelines` | vercel-labs/agent-skills | audit UI 100+ règles : a11y, focus, forms, perf, UX. Va chercher les règles à jour à chaque appel | [V] |
-| `vercel-react-native-skills` | vercel-labs/agent-skills | 16 règles RN/Expo sur 7 sections : listes, Reanimated, safe areas, images, polices, monorepo | [V] |
-| `react-view-transitions` | vercel-labs/agent-skills | API View Transitions en React | [V][O] |
-| `before-and-after` | vercel-labs/before-and-after | screenshots avant/après dans la PR (`--markdown`, `--mobile`). Upload public 0x0.st par défaut → `--upload` custom si sensible | [V] |
-| `find-skills` | vercel-labs/skills | Claude cherche un skill existant sur skills.sh avant d'en écrire un | [V] |
-| `frontend-design` **ou** `impeccable` (un seul) | anthropics/skills · pbakaus/impeccable | direction esthétique | [V] |
-| Plugins LSP (TS, Python) | marketplace officiel Anthropic | diagnostics après chaque édition | [V] |
-| Context7 MCP · Playwright MCP | Upstash · Microsoft | docs à jour · navigateur | [V] |
-| `code-review` plugin | marketplace officiel | review inline sur PR | [V] |
-| Greptile MCP + `check-pr` / `greploop` | greptileai/skills | boucle jusqu'à confidence 5/5 (max 5 itérations) | [V][O] |
-| `vercel-deploy-claimable`, `vercel-optimize` | vercel-labs/agent-skills | seulement si déploiement Vercel | [V][O] |
-| Figma MCP | Figma | seulement si maquettes | [V][O] |
+| `react-best-practices` | vercel-labs/agent-skills | 70 prioritized React/Next.js perf rules (waterfalls and bundle as critical). ~185K installs | [V] |
+| `composition-patterns` | vercel-labs/agent-skills | React patterns that scale: compound components, lifting state, no boolean-prop sprawl | [V] |
+| `web-design-guidelines` | vercel-labs/agent-skills | UI audit with 100+ rules: a11y, focus, forms, perf, UX. Fetches the up-to-date rules on every call | [V] |
+| `vercel-react-native-skills` | vercel-labs/agent-skills | 16 RN/Expo rules across 7 sections: lists, Reanimated, safe areas, images, fonts, monorepo | [V] |
+| `react-view-transitions` | vercel-labs/agent-skills | View Transitions API in React | [V][O] |
+| `before-and-after` | vercel-labs/before-and-after | before/after screenshots in the PR (`--markdown`, `--mobile`). Public upload to 0x0.st by default → custom `--upload` if sensitive | [V] |
+| `find-skills` | vercel-labs/skills | Claude looks for an existing skill on skills.sh before writing one | [V] |
+| `frontend-design` **or** `impeccable` (only one) | anthropics/skills · pbakaus/impeccable | aesthetic direction | [V] |
+| LSP plugins (TS, Python, ...) | official Anthropic marketplace | diagnostics after every edit | [V] |
+| Context7 MCP · Playwright MCP | Upstash · Microsoft | up-to-date library docs · browser for Claude | [V] |
+| `code-review` plugin | official marketplace | inline review on the PR | [V] |
+| Greptile MCP + `check-pr` / `greploop` | greptileai/skills | loops until confidence 5/5 (max 5 iterations) | [V][O] |
+| `vercel-deploy-claimable`, `vercel-optimize` | vercel-labs/agent-skills | only if deploying to Vercel | [V][O] |
+| Figma MCP | Figma | only if mockups exist | [V][O] |
 
-Non retenus de la collection Vercel : `writing-guidelines` (review de prose/docs, pas de code).
-Mise à jour : `npx skills update -y`.
-
----|---|---|---|
-| Plugins LSP (TS, Python, …) | marketplace officiel Anthropic | diagnostics après chaque édition | [V] |
-| Context7 MCP | Upstash | docs de libs à jour | [V] |
-| Playwright MCP | Microsoft | navigateur pour Claude | [V] |
-| `frontend-design` **ou** `impeccable` (un seul) | anthropics/skills · pbakaus/impeccable | direction esthétique | [V] |
-| `web-design-guidelines` | vercel-labs/agent-skills | audit a11y / UX / forms, 100+ règles | [V] |
-| `react-best-practices` | vercel-labs/agent-skills | 70 règles perf React/Next (moitié Next-spécifique) | [V] |
-| `before-and-after` | vercel-labs/before-and-after | screenshots avant/après dans la PR (upload public 0x0.st par défaut → `--upload` custom si sensible) | [V] |
-| `code-review` plugin | marketplace officiel | review inline sur PR | [V] |
-| Greptile MCP + `check-pr` / `greploop` | greptileai/skills | boucle jusqu'à confidence 5/5 (max 5 itérations) | [V][O] |
-| Figma MCP | Figma | seulement si maquettes existent | [V][O] |
+Not retained from the Vercel collection: `writing-guidelines` (prose/docs review, not code).
+Update: `npx skills update -y`.
 
 ---
 
-### 4.5 Deux niveaux de parallélisme
+### 4.5 Two levels of parallelism
 
-| Niveau | En parallèle | Outil | Visibilité |
+| Level | In parallel | Tool | Visibility |
 |---|---|---|---|
-| **Intra-feature** | les tranches d'une même spec | sous-agents natifs `builder` avec `isolation: worktree` (worktree créé, isolé, nettoyé par Claude Code ; rapport remonté au parent automatiquement) [V] | Ctrl+T (liste des tâches), panneau d'agents, transcription dépliable [V] |
-| **Inter-features** | 2-3 features de la roadmap | une session `claude --worktree <feature>` par pane **herdr**, chacune lance son propre `/spec` → `/build` → `/pr` [V] | sidebar herdr : working / blocked / done par feature [V] |
+| **Intra-feature** | the slices of a single spec | native `builder` subagents with `isolation: worktree` (worktree created, isolated and cleaned up by Claude Code; report returned to the parent automatically) [V] | Ctrl+T (task list), agents panel, expandable transcript [V] |
+| **Inter-feature** | 2-3 roadmap features | one `claude --worktree <feature>` session per **herdr** pane, each running its own `/spec` → `/build` → `/pr` [V] | herdr sidebar: working / blocked / done per feature [V] |
 
-Pourquoi pas des sessions séparées par tranche : Claude Code n'a aucun canal natif de remontée entre sessions ; il faudrait réécrire la plomberie de firstmate (spawn, attente, rapport, merge, teardown) en bash. Les sous-agents font tout ça nativement. herdr reste pertinent au niveau au-dessus, où il n'y a rien à remonter : chaque session se termine par sa PR.
+Why not separate sessions per slice: Claude Code has no native channel for reporting back between sessions; you would have to rewrite firstmate's plumbing (spawn, wait, report, merge, teardown) in bash.
+Subagents do all of that natively.
+herdr remains relevant one level up, where there is nothing to report back: every session ends with its PR.
 
-Lancement automatique (`scripts/factory-next.sh N`) : le gate humain de la spec est déplacé **avant** le lancement.
+Automatic launch (`scripts/factory-next.sh N`): the human spec gate is moved **before** the launch.
 ```
-pane principal (main) :  /roadmap  →  /spec f1 👤  /spec f2 👤   →  scripts/factory-next.sh 2
-                          ↳ 2 panes herdr : claude --worktree f1 "/build → /pr"   (idem f2)
-toi : sidebar herdr + PRs GitHub → merge → factory-next.sh 1 → feature suivante
+main pane (main):  /roadmap  →  /spec f1 👤 "hold"  /spec f2 👤 "hold"   →  scripts/factory-next.sh 2
+                    ↳ 2 herdr panes: claude --worktree f1 "/build → /pr"   (same for f2)
+you: herdr sidebar + GitHub PRs → merge → factory-next.sh 1 → next feature
 ```
-Le script prend les specs `validée` sans PR ni worktree en cours et lance des sessions **interactives avec prompt initial** (pas `-p`) : si une session a besoin de toi, elle s'arrête sur sa question et attend dans son pane → `blocked` dans la sidebar herdr → tu réponds, elle repart. Les builders sont instruits de faire une hypothèse (notée dans le rapport) plutôt que de demander, sauf décision produit. Point fragile non vérifié : le format de `herdr pane list` pour récupérer l'id du pane.
+The script picks the `validated` specs that have no PR and no worktree in progress, and launches **interactive sessions with an initial prompt** (not `-p`): if a session needs you, it stops on its question and waits in its pane → `blocked` in the herdr sidebar → you answer, it resumes.
+Builders are instructed to make an assumption (recorded in the report) rather than ask, except for product decisions.
+Unverified weak point: the output format of `herdr pane list` used to get the pane id.
 
-## 5. Couche 4 — Boucle de production
+## 5. Layer 4 - Production loop
 
 ```
-FROM SCRATCH (pane principal, main) : idée → /prd → 👤 → /architecture → 👤 → /roadmap (issues)
-SPECS PAR LOT (pane principal, main) : /spec f1 → 👤 · /spec f2 → 👤 · …
-LANCEMENT AUTO                        : scripts/factory-next.sh N → N panes herdr, claude --worktree <f> "/build → /pr"
-PAR FEATURE (session autonome)        : /build (builders ∥ → verifier → simplifier → reviewer vs spec) → /pr
-                                        [question bloquante → pane `blocked` → 👤 répond]
-GITHUB                                : CI → bots de review → 👤 merge → factory-next.sh 1 → suivante
+FROM SCRATCH (main pane, main)    : idea → /prd → 👤 → /architecture → 👤 → Makefile filled → /roadmap (issues) → /spec f1 → 👤 → /build → /pr
+SPECS IN BATCH (main pane, main)  : /spec f2 → 👤 "hold" · /spec f3 → 👤 "hold" · ...
+AUTO LAUNCH                       : scripts/factory-next.sh N → N herdr panes, claude --worktree <f> "/build → /pr"
+PER FEATURE (autonomous session)  : /build (builders ∥ → verifier → simplifier → reviewer vs spec) → /pr
+                                    [blocking question → pane `blocked` → 👤 answers]
+GITHUB                            : CI → review bots → 👤 merge → factory-next.sh 1 → next
 ```
 
-Proportion : `/prd` et `/architecture` seulement au démarrage ou sur refonte ; une feature sur repo existant entre directement en `/spec` ; un bug = spec de 5 lignes. Un ADR seulement pour une décision difficile à annuler. (Inspiré de Spec Kit constitution→specify→plan→tasks, Kiro requirements EARS→design→tasks, BMAD brief→PRD→architecture→stories, sans leur cérémonie.)
+Proportion: `/prd` and `/architecture` only at kickoff or on a major refactor; a feature on an existing repo goes straight into `/spec`; a bug = a 5-line spec.
+An ADR only for a decision that is hard to undo.
+(Inspired by Spec Kit constitution→specify→plan→tasks, Kiro requirements EARS→design→tasks, BMAD brief→PRD→architecture→stories, without their ceremony.)
 
-Note sur Greptile 5/5 : bon gate automatique, pas un critère de merge — une IA qui satisfait une autre IA optimise l'approbation, pas la justesse. Les critères d'acceptation de la spec (transformés en tests) valident ; toi tu merges.
+Note on Greptile 5/5: a good automatic gate, not a merge criterion - an AI satisfying another AI optimizes for approval, not correctness.
+The spec's acceptance criteria (turned into tests) validate; you merge.
 
 ---
 
-## 6. Couche 5 — CI/CD
+## 6. Layer 5 - CI/CD
 
-| Fichier | Rôle |
+| File | Role |
 |---|---|
-| `ci.yml` | sur chaque PR : `make check` puis `make e2e` |
-| `claude.yml` | `anthropics/claude-code-action` : `@claude` dans issues/PR (à générer idéalement via `/install-github-app`) |
-| bot de review | `code-review` officiel et/ou Greptile |
-| déploiement | preview par PR, prod sur tag — jamais depuis la machine de Claude |
+| `ci.yml` | on every PR: `make check` then `make e2e` |
+| `claude.yml` | `anthropics/claude-code-action`: `@claude` in issues/PRs (ideally generated via `/install-github-app`) |
+| review bot | official `code-review` and/or Greptile |
+| deployment | preview per PR, prod on tag - never from Claude's machine |
 
 ---
 
-## 7. Couche 6 — Amélioration continue
+## 7. Layer 6 - Continuous improvement
 
-- Chaque correction → `AGENTS.md` "Pièges connus" (composition).
-- `/loop 30m /babysit` sur les PRs ouvertes (rebase, adresser les reviews). [V]
-- Sentry / logs en MCP pour partir du stack trace réel. [O]
+- Every correction → `AGENTS.md` "Known pitfalls" (it compounds).
+- Open PRs are kept healthy by `no-mistakes`: its CI monitor rebases and resolves conflicts on its own after checks pass. Without it, write your own babysit skill and run it with `/loop 30m`. [D]
+- Sentry / logs as MCP to start from the real stack trace. [O]
 
 ---
 
-## 8. Ordre de mise en place
+## 8. Rollout order
 
-| Quand | Quoi |
+| When | What |
 |---|---|
-| Jour 1 | `Makefile` + `AGENTS.md` + `CONSTITUTION.md` + `settings.json` (3 hooks). 80 % de la valeur |
-| Semaine 1 | 5 agents, `/spec`, `/build`, `/pr`, puis `/prd` `/architecture` `/roadmap` si nouveau projet, `ci.yml`, LSP, Playwright, `web-design-guidelines` |
-| Mois 1 | `/build` parallèle, herdr pour plusieurs features, `/design-review`, `before-and-after`, `claude.yml`, bots de PR, `/babysit` |
-| Jamais sans besoin prouvé | agent teams, orchestrateur externe (firstmate…), second skill design |
+| Day 1 | `Makefile` + `AGENTS.md` + `CONSTITUTION.md` + `settings.json` (3 hooks). 80% of the value |
+| Week 1 | 5 agents, `/spec`, `/build`, `/pr`, then `/prd` `/architecture` `/roadmap` for a new project, `ci.yml`, LSP, Playwright, `web-design-guidelines` |
+| Month 1 | parallel `/build`, herdr for several features, `/design-review`, `before-and-after`, `claude.yml`, PR bots, `no-mistakes` gate |
+| Never without a proven need | agent teams, external orchestrator (firstmate...), second design skill |
 
 ---
 
-## 9. Démarrage
+## 9. Getting started
 
 ```bash
 git init && git add . && git commit -m "chore: software factory scaffold"
-# 1. remplir les cibles du Makefile pour ta stack
-# 2. remplir backend/AGENTS.md et frontend/AGENTS.md
-# 3. bash scripts/install-skills.sh
-# 4. claude  →  /spec "ma première feature"
+# 1. bash scripts/install-skills.sh
+# 2. new project:   claude  →  /prd "my idea"   (the rest chains; /architecture fills the Makefile and the AGENTS.md files)
+#    existing repo: fill in the Makefile targets and the AGENTS.md files yourself, then  claude  →  /spec "my first feature"
 ```

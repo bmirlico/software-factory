@@ -2,9 +2,10 @@
 name: build
 description: Use after a spec is validated. Implements it slice by slice with parallel native builder subagents (each in an isolated worktree), then verifies, simplifies, and runs an independent review against the spec.
 ---
-Pré-requis : une spec au statut `validée`. Sinon, appelle /spec.
-1. Crée la branche `feat/<slug>` depuis main.
-2. Un agent `builder` par tranche indépendante, lancés EN PARALLÈLE si les périmètres sont disjoints (chacun a `isolation: worktree` : Claude Code crée, isole et nettoie le worktree lui-même). Passe à chacun : chemin de la spec, numéro de tranche, périmètre. Suivi : Ctrl+T (liste des tâches) ou le panneau d'agents.
-3. Intègre les tranches rendues sur `feat/<slug>`, lance `verifier`. Si ROUGE : corrige directement (pas de re-spawn pour des fixes). Max 3 tours.
-4. Lance `simplifier`. 5. Lance `reviewer` (lecture seule, compare le diff à la spec). Si BLOQUANTS : corrige, relance `verifier` + `reviewer`. Max 2 tours.
-6. Rends : tranches, critères couverts, verdict du reviewer, points ouverts. Ne crée pas la PR : c'est /pr.
+Prerequisite: a spec with status `validated`. Otherwise, call /spec.
+1. Create the branch `feat/<slug>` from main.
+2. One `builder` agent per independent slice, launched IN PARALLEL when scopes are disjoint (each has `isolation: worktree`: Claude Code creates, isolates and cleans up the worktree itself). Pass each one: spec path, slice number, scope. Tracking: Ctrl+T (task list) or the agents panel.
+3. Integrate the returned slices into `feat/<slug>`, run `verifier`. If RED: fix directly (no re-spawn for fixes). Max 3 rounds.
+4. Run `simplifier`. 5. Run `reviewer` (read-only, compares the diff to the spec). If BLOCKING items: fix, re-run `verifier` + `reviewer`. Max 2 rounds.
+6. Return: slices, criteria covered, reviewer verdict, open points.
+7. If the reviewer verdict is READY FOR PR, run the `pr` skill right away, without waiting to be asked. If it is NOT READY after the 2 rounds, stop and report.

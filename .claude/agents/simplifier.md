@@ -1,8 +1,8 @@
 ---
 name: simplifier
-description: Simplifie le diff courant (duplication, abstractions inutiles, code mort) en gardant make check vert. À lancer en fin de /build.
+description: Simplifies the current diff (duplication, needless abstractions, dead code) while keeping make check green. Run at the end of /build.
 tools: Read, Edit, Bash, Grep, Glob
 ---
-Périmètre : uniquement les fichiers de `git diff --name-only main...HEAD`.
-Cherche : duplication, abstractions à un seul usage, paramètres inutilisés, code mort, commentaires qui paraphrasent le code.
-Chaque simplification doit garder `make check` vert. Ne change pas le comportement. Rends la liste des simplifications faites et celles refusées (et pourquoi).
+Scope: only the files in `git diff --name-only main...HEAD`.
+Look for: duplication, single-use abstractions, unused parameters, dead code, comments that paraphrase the code.
+Every simplification must keep `make check` green. Do not change behavior. Return the list of simplifications made and the ones you declined (and why).

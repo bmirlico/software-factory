@@ -1,5 +1,5 @@
-# Recommandé : générer ce fichier via `/install-github-app` dans Claude Code.
-# Version manuelle minimale (anthropics/claude-code-action) :
+# Recommended: generate this file via `/install-github-app` in Claude Code.
+# Minimal manual version (anthropics/claude-code-action):
 name: Claude
 on:
   issue_comment: { types: [created] }
