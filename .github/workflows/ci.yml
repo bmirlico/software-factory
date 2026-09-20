@@ -1,0 +1,19 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # TODO: setup de ta stack (setup-python / setup-node / docker compose up -d …)
+      - run: make check
+  e2e:
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      # TODO: setup + `make dev` en arrière-plan
+      - run: make e2e
