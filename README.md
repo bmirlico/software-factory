@@ -107,11 +107,11 @@ The `reviewer` is an automatic gate before the PR; human review stays on the PR 
 | `/spec` | roadmap issue or ad hoc | `researcher` → micro-spec `docs/specs/<slug>.md` with **EARS** criteria → **stops**, waits for human validation | [D] |
 | `/build` | validated spec | one `builder` subagent per slice, in parallel, each in an isolated worktree → `verifier` → `simplifier` → `reviewer` vs spec | [D] |
 | `/pr` | green `make check` | description from spec + diff; if UI changed → `before-and-after --markdown`; then ships through the `no-mistakes` gate (review, tests, push, PR, CI watch) with the spec as intent; falls back to `git push` + `gh pr create` when it is not installed | [D] |
-| `/design-review` | any UI change | Playwright desktop+mobile, screenshots, `web-design-guidelines`, one single batch of fixes, one confirmation, stop | [D] |
+| `/design-review` | run by `/build` when the diff touches `frontend/` or `mobile/`, or on demand | Playwright desktop+mobile, screenshots, `web-design-guidelines`, one single batch of fixes, one confirmation, stop | [D] |
 | `/techdebt` | end of week | duplication, slow tests, missing ADRs → issues | [O] |
 
 The skills chain on their own: `/prd` is the single entry point of a new project.
-Each skill stops at its human gate, and as soon as you pass it ("PRD validated", "architecture validated", "spec validated") it runs the next one: `/prd` → `/architecture` → `/roadmap` → `/spec` (first feature) → `/build` → `/pr`.
+Each skill stops at its human gate, and as soon as you pass it ("PRD validated", "architecture validated", "spec validated") it runs the next one: `/prd` → `/architecture` → `/roadmap` → `/spec` (first feature) → `/build` → `/design-review` (UI diffs only) → `/pr`.
 Say "spec validated, hold" to validate a spec without building it, which is what batch mode (`scripts/factory-next.sh`) needs.
 
 ### 4.4 To install (not to write) - `scripts/install-skills.sh`
@@ -167,7 +167,7 @@ Unverified weak point: the output format of `herdr pane list` used to get the pa
 FROM SCRATCH (main pane, main)    : idea → /prd → 👤 → /architecture → 👤 → Makefile filled → /roadmap (issues) → /spec f1 → 👤 → /build → /pr
 SPECS IN BATCH (main pane, main)  : /spec f2 → 👤 "hold" · /spec f3 → 👤 "hold" · ...
 AUTO LAUNCH                       : scripts/factory-next.sh N → N herdr panes, claude --worktree <f> "/build → /pr"
-PER FEATURE (autonomous session)  : /build (builders ∥ → verifier → simplifier → reviewer vs spec) → /pr
+PER FEATURE (autonomous session)  : /build (builders ∥ → verifier → simplifier → reviewer vs spec) → /design-review if UI → /pr
                                     [blocking question → pane `blocked` → 👤 answers]
 GITHUB                            : CI → review bots → 👤 merge → factory-next.sh 1 → next
 ```

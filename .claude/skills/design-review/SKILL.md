@@ -1,6 +1,6 @@
 ---
 name: design-review
-description: Use after any UI change. Opens the app in a browser, screenshots key routes on desktop and mobile, audits against design guidelines, applies ONE batch of fixes, confirms once, stops.
+description: Runs automatically from /build when the diff touches frontend/ or mobile/, or on demand after any UI change. Opens the app in a browser, screenshots key routes on desktop and mobile, audits against design guidelines, applies ONE batch of fixes, confirms once, stops.
 ---
 Prerequisites: Playwright MCP (or the Chrome extension) and `web-design-guidelines` installed.
 1. `make dev`. List the routes touched by the diff.
