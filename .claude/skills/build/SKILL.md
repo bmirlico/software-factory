@@ -8,4 +8,4 @@ Prerequisite: a spec with status `validated`. Otherwise, call /spec.
 3. Integrate the returned slices into `feat/<slug>`, run `verifier`. If RED: fix directly (no re-spawn for fixes). Max 3 rounds.
 4. Run `simplifier`. 5. Run `reviewer` (read-only, compares the diff to the spec). If BLOCKING items: fix, re-run `verifier` + `reviewer`. Max 2 rounds.
 6. Return: slices, criteria covered, reviewer verdict, open points.
-7. If the reviewer verdict is READY FOR PR, run the `pr` skill right away, without waiting to be asked. If it is NOT READY after the 2 rounds, stop and report.
+7. If the reviewer verdict is READY FOR PR: when `git diff --name-only main...HEAD` touches `frontend/` or `mobile/`, run the `design-review` skill first, then run the `pr` skill; otherwise run `pr` directly. Do not wait to be asked. If it is NOT READY after the 2 rounds, stop and report.
