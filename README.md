@@ -120,12 +120,12 @@ Front = React (web) + React Native → we rely on the official **vercel-labs/age
 
 | What | Source | Role | Status |
 |---|---|---|---|
-| `react-best-practices` | vercel-labs/agent-skills | 70 prioritized React/Next.js perf rules (waterfalls and bundle as critical). ~185K installs | [V] |
-| `composition-patterns` | vercel-labs/agent-skills | React patterns that scale: compound components, lifting state, no boolean-prop sprawl | [V] |
+| `vercel-react-best-practices` | vercel-labs/agent-skills | 70 prioritized React/Next.js perf rules (waterfalls and bundle as critical). ~185K installs | [V] |
+| `vercel-composition-patterns` | vercel-labs/agent-skills | React patterns that scale: compound components, lifting state, no boolean-prop sprawl | [V] |
 | `web-design-guidelines` | vercel-labs/agent-skills | UI audit with 100+ rules: a11y, focus, forms, perf, UX. Fetches the up-to-date rules on every call | [V] |
 | `vercel-react-native-skills` | vercel-labs/agent-skills | 16 RN/Expo rules across 7 sections: lists, Reanimated, safe areas, images, fonts, monorepo | [V] |
-| `react-view-transitions` | vercel-labs/agent-skills | View Transitions API in React | [V][O] |
-| `before-and-after` | vercel-labs/before-and-after | before/after screenshots in the PR (`--markdown`, `--mobile`). Public upload to 0x0.st by default → custom `--upload` if sensitive | [V] |
+| `vercel-react-view-transitions` | vercel-labs/agent-skills | View Transitions API in React | [V][O] |
+| `before-and-after` | vercel-labs/before-and-after | before/after screenshots in the PR via `npx @vercel/before-and-after` (`--markdown`, `--mobile`). Public upload to 0x0.st by default → custom `--upload` if sensitive | [V] |
 | `find-skills` | vercel-labs/skills | Claude looks for an existing skill on skills.sh before writing one | [V] |
 | `frontend-design` **or** `impeccable` (only one) | anthropics/skills · pbakaus/impeccable | aesthetic direction | [V] |
 | LSP plugins (TS, Python, ...) | official Anthropic marketplace | diagnostics after every edit | [V] |

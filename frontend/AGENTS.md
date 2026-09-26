@@ -5,8 +5,8 @@
 - One component = file + test (vitest + testing-library) + story if reusable.
 
 ## Skills to use (installed via scripts/install-skills.sh)
-- `react-best-practices` (Vercel): for every component / data fetching / perf review. Priorities: waterfalls and bundle size.
-- `composition-patterns` (Vercel): as soon as a component accumulates boolean props → compound components.
+- `vercel-react-best-practices` (Vercel): for every component / data fetching / perf review. Priorities: waterfalls and bundle size.
+- `vercel-composition-patterns` (Vercel): as soon as a component accumulates boolean props → compound components.
 - `web-design-guidelines` (Vercel): a11y/UX/forms audit **before any UI PR** (called by /design-review).
 - active design skill (`frontend-design` or `impeccable`): aesthetic direction. Follow DESIGN.md if it exists. No color/font outside the tokens.
 - `before-and-after` (Vercel): screenshots in the PR (called by /pr).

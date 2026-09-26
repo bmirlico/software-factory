@@ -9,7 +9,7 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(gh pr:*)",
-      "Bash(before-and-after:*)"
+      "Bash(npx @vercel/before-and-after:*)"
     ],
     "deny": [
       "Read(./.env)",

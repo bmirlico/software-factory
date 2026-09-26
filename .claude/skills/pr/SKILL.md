@@ -4,8 +4,8 @@ description: Use when make check is green and the work is ready for review. Writ
 ---
 1. `make check` green AND `reviewer` verdict = READY FOR PR. Otherwise stop.
 2. Read the linked spec and `git diff main...HEAD`.
-3. If files under frontend/ or mobile/ changed AND `before-and-after` is installed:
-   run `make dev`, then `before-and-after <main-url> <branch-url> --mobile --markdown`
+3. If files under frontend/ or mobile/ changed:
+   run `make dev`, then `npx @vercel/before-and-after <main-url> <branch-url> --mobile --markdown`
    (main-url = preview of main, or the app running on main in another worktree). Collect the markdown table.
 4. Write the description:
    ## Context (spec link, issue) · ## Changes · ## Acceptance criteria covered (checked boxes) ·
