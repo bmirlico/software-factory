@@ -11,10 +11,10 @@ npx skills add anthropics/skills --skill frontend-design -a claude-code -y
 # npx skills add pbakaus/impeccable -a claude-code -y   # alternative: deterministic detector + PRODUCT.md/DESIGN.md
 
 # --- Vercel Labs: React web ---
-npx skills add vercel-labs/agent-skills --skill react-best-practices     -a claude-code -y   # 70 React/Next perf rules
-npx skills add vercel-labs/agent-skills --skill composition-patterns     -a claude-code -y   # compound components, anti boolean-props
+npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices     -a claude-code -y   # 70 React/Next perf rules
+npx skills add vercel-labs/agent-skills --skill vercel-composition-patterns     -a claude-code -y   # compound components, anti boolean-props
 npx skills add vercel-labs/agent-skills --skill web-design-guidelines    -a claude-code -y   # a11y/UX/forms audit, 100+ rules
-# npx skills add vercel-labs/agent-skills --skill react-view-transitions -a claude-code -y   # if you use the View Transitions API
+# npx skills add vercel-labs/agent-skills --skill vercel-react-view-transitions -a claude-code -y   # if you use the View Transitions API
 
 # --- Vercel Labs: React Native / Expo ---
 # Slug as listed by --list above (react-native-skills or vercel-react-native-skills depending on the version)
@@ -22,14 +22,15 @@ npx skills add vercel-labs/agent-skills --skill vercel-react-native-skills -a cl
 
 # --- Vercel Labs: visual proof in the PR ---
 npx skills add vercel-labs/before-and-after -a claude-code -y
-npm i -g @vercel/before-and-after
+# No global install: /pr runs it with `npx @vercel/before-and-after` (a global npm prefix is often not user-writable).
 
 # --- Vercel Labs: meta ---
 npx skills add vercel-labs/skills --skill find-skills -a claude-code -y   # Claude looks for an existing skill itself before writing one
 
 # --- MCP ---
-claude mcp add --scope user --transport http --header "CONTEXT7_API_KEY: $CONTEXT7_API_KEY" context7 https://mcp.context7.com/mcp
-claude mcp add playwright -- npx @playwright/mcp@latest
+# Skipped when already configured: `claude mcp add` fails on an existing name.
+claude mcp get context7 >/dev/null 2>&1 || claude mcp add --scope user --transport http --header "CONTEXT7_API_KEY: $CONTEXT7_API_KEY" context7 https://mcp.context7.com/mcp
+claude mcp get playwright >/dev/null 2>&1 || claude mcp add playwright -- npx @playwright/mcp@latest
 
 # --- In Claude Code (interactive) ---
 echo "In Claude Code:"

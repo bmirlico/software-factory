@@ -5,8 +5,8 @@
 
 ## Skills to use
 - `vercel-react-native-skills` (Vercel): lists (FlashList), Reanimated animations, safe areas, pressables, images, fonts, monorepo. Load for any component or screen.
-- `react-best-practices` (Vercel): the generic React rules (re-renders, memo) apply here too; ignore the Next.js/RSC ones.
-- `composition-patterns` (Vercel): same as web.
+- `vercel-react-best-practices` (Vercel): the generic React rules (re-renders, memo) apply here too; ignore the Next.js/RSC ones.
+- `vercel-composition-patterns` (Vercel): same as web.
 - active design skill: same tokens as web (shared DESIGN.md).
 
 ## Rules
