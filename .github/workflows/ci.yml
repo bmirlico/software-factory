@@ -3,8 +3,10 @@ on:
   pull_request:
   push:
     branches: [main]
+# The template repo itself has no stack: its Makefile targets fail on purpose, so CI is skipped there only.
 jobs:
   check:
+    if: github.repository != 'bmirlico/software-factory'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

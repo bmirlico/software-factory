@@ -67,6 +67,7 @@ The same file is read by Codex, Cursor, Amp... [V]
 | `migrate` | DB migrations | alembic / prisma / ... |
 
 Cross-cutting for any stack: `gitleaks` (secrets), dependency audit (`pip-audit` / `npm audit` / `cargo audit`), `pre-commit`.
+Unfilled targets fail on purpose (`not configured`), so `make check` is red until `/architecture` fills them in; the Stop hook and CI know to ignore that state.
 `make` is not a formal standard but a universal convention; `just` is an equivalent alternative.
 Pick one and never change.
 
