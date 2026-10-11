@@ -6,6 +6,6 @@ Prerequisites: validated PRD and ARCHITECTURE.
 1. Extract the Must then Should features from the PRD. Split any feature larger than ~3 days of work into sub-features that can ship on their own.
 2. Order by technical dependency (foundations first: skeleton, auth, data model), then by value.
 3. Write `docs/ROADMAP.md`: table (order, feature, one-line scope, depends on, value, status).
-4. For each feature: `gh issue create --label feature --title "<feature>" --body "<scope + dependencies + PRD link>"`.
+4. Make sure the label exists (a repo created from the template has none): `gh label create feature --color 1D76DB --description "Roadmap feature, one spec in docs/specs/" --force`. Then for each feature: `gh issue create --label feature --title "<feature>" --body "<scope + dependencies + PRD link>"`.
 5. Display the roadmap. Do not detail the specs here: that is /spec, one at a time.
 6. Then run the `spec` skill right away on the first feature of the list (the skeleton), without waiting to be asked.
